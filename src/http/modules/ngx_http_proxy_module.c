@@ -885,7 +885,7 @@ ngx_http_proxy_eval(ngx_http_request_t *r, ngx_http_proxy_ctx_t *ctx,
     if (u->resolved == NULL) {
         return NGX_ERROR;
     }
-
+    //解析完变量之后，proxy_pass中的host为ip地址
     if (url.addrs && url.addrs[0].sockaddr) {
         u->resolved->sockaddr = url.addrs[0].sockaddr;
         u->resolved->socklen = url.addrs[0].socklen;
@@ -3276,7 +3276,7 @@ ngx_http_proxy_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     u.default_port = port;
     u.uri_part = 1;
     u.no_resolve = 1;
-
+    //如果proxy_pass中含有变量，不会运行到此处
     plcf->upstream.upstream = ngx_http_upstream_add(cf, &u, 0);
     if (plcf->upstream.upstream == NULL) {
         return NGX_CONF_ERROR;

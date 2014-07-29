@@ -11,7 +11,7 @@
 
 
 typedef struct {
-    ngx_uint_t                         max_cached;
+    ngx_uint_t                         max_cached;	//最大允许多少个keepalive连接
 
     ngx_queue_t                        cache;
     ngx_queue_t                        free;

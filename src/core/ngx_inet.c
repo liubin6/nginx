@@ -13,7 +13,7 @@ static ngx_int_t ngx_parse_unix_domain_url(ngx_pool_t *pool, ngx_url_t *u);
 static ngx_int_t ngx_parse_inet_url(ngx_pool_t *pool, ngx_url_t *u);
 static ngx_int_t ngx_parse_inet6_url(ngx_pool_t *pool, ngx_url_t *u);
 
-
+//若返回INADDR_NONE，表示text不是ip地址；若是ip地址，则返回htonl(addr);
 in_addr_t
 ngx_inet_addr(u_char *text, size_t len)
 {
@@ -617,7 +617,7 @@ ngx_parse_unix_domain_url(ngx_pool_t *pool, ngx_url_t *u)
 #endif
 }
 
-
+//解析host是否为ip地址
 static ngx_int_t
 ngx_parse_inet_url(ngx_pool_t *pool, ngx_url_t *u)
 {
@@ -774,6 +774,7 @@ ngx_parse_inet_url(ngx_pool_t *pool, ngx_url_t *u)
         return NGX_OK;
     }
 
+    //proxy_pass和proxy_eval中都会设置no_resolve为1。
     if (u->no_resolve) {
         return NGX_OK;
     }

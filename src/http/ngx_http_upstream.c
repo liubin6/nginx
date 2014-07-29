@@ -587,6 +587,7 @@ ngx_http_upstream_init_request(ngx_http_request_t *r)
     cln->data = r;
     u->cleanup = &cln->handler;
 
+    //只有在proxy_pass中包含变量的时，u->resolved!=NULL
     if (u->resolved == NULL) {
 
         uscf = u->conf->upstream;
@@ -596,7 +597,7 @@ ngx_http_upstream_init_request(ngx_http_request_t *r)
 #if (NGX_HTTP_SSL)
         u->ssl_name = u->resolved->host;
 #endif
-
+        //此路径表示proxy_pass中含有变量，且host为ip地址
         if (u->resolved->sockaddr) {
 
             if (ngx_http_upstream_create_round_robin_peer(r, u->resolved)
@@ -617,7 +618,7 @@ ngx_http_upstream_init_request(ngx_http_request_t *r)
         umcf = ngx_http_get_module_main_conf(r, ngx_http_upstream_module);
 
         uscfp = umcf->upstreams.elts;
-
+        //计算出proxy_pass变量后，查看upstream_main_conf的upstreams中是否已经存在
         for (i = 0; i < umcf->upstreams.nelts; i++) {
 
             uscf = uscfp[i];
@@ -5172,7 +5173,7 @@ ngx_http_upstream_add(ngx_conf_t *cf, ngx_url_t *u, ngx_uint_t flags)
         us->addrs = u->addrs;
         us->naddrs = 1;
     }
-
+    //ngx_http_upstream_main_conf_t中的upstream为ngx_http_upstream_srv_conf_t的数组
     uscfp = ngx_array_push(&umcf->upstreams);
     if (uscfp == NULL) {
         return NULL;

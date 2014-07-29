@@ -70,7 +70,7 @@ typedef struct {
 typedef struct {
     struct sockaddr          *sockaddr;
     socklen_t                 socklen;
-    ngx_str_t                 name;
+    ngx_str_t                 name;		//如:192.168.1.10:88
 } ngx_addr_t;
 
 
@@ -86,8 +86,8 @@ typedef struct {
 
     unsigned                  listen:1;
     unsigned                  uri_part:1;
-    unsigned                  no_resolve:1;
-    unsigned                  one_addr:1;  /* compatibility */
+    unsigned                  no_resolve:1;	//感觉此标记作用不大，应为几乎每个流程都会变把no_resolve置1
+    unsigned                  one_addr:1;  	/* compatibility */
 
     unsigned                  no_port:1;
     unsigned                  wildcard:1;
@@ -96,7 +96,7 @@ typedef struct {
     u_char                    sockaddr[NGX_SOCKADDRLEN];
 
     ngx_addr_t               *addrs;
-    ngx_uint_t                naddrs;
+    ngx_uint_t                naddrs;		//url解析出来的个数
 
     char                     *err;
 } ngx_url_t;

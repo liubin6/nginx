@@ -261,7 +261,7 @@ typedef struct {
     ngx_str_t                        host;
     in_port_t                        port;
     ngx_uint_t                       no_port; /* unsigned no_port:1 */
-
+    //若sockaddr不为NULL，则表示仅有一个socket；否则有naddrs个socket存储在addrs数组中；
     ngx_uint_t                       naddrs;
     ngx_addr_t                      *addrs;
 
