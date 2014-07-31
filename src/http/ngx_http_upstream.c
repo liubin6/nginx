@@ -713,7 +713,7 @@ ngx_http_upstream_cache(ngx_http_request_t *r, ngx_http_upstream_t *u)
         if (!(r->method & u->conf->cache_methods)) {
             return NGX_DECLINED;
         }
-
+        //proxy_cache时，会把head请求转变为get请求
         if (r->method & NGX_HTTP_HEAD) {
             u->method = ngx_http_core_get_method;
         }
@@ -1868,7 +1868,7 @@ ngx_http_upstream_process_header(ngx_http_request_t *r, ngx_http_upstream_t *u)
     if (ngx_http_upstream_process_headers(r, u) != NGX_OK) {
         return;
     }
-
+    //subrequest_in_memory为1表示不需要转发；
     if (!r->subrequest_in_memory) {
         ngx_http_upstream_send_response(r, u);
         return;
@@ -2377,7 +2377,7 @@ ngx_http_upstream_send_response(ngx_http_request_t *r, ngx_http_upstream_t *u)
     }
 
     clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
-
+    //buffering表示会缓存
     if (!u->buffering) {
 
         if (u->input_filter == NULL) {

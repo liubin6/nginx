@@ -362,7 +362,7 @@ ngx_resolve_name(ngx_resolver_ctx_t *ctx)
 
     ngx_log_debug1(NGX_LOG_DEBUG_CORE, r->log, 0,
                    "resolve: \"%V\"", &ctx->name);
-
+    //若为ip地址，则直接调用回调函数，返回；
     if (ctx->quick) {
         ctx->handler(ctx);
         return NGX_OK;
@@ -476,13 +476,13 @@ ngx_resolve_name_locked(ngx_resolver_t *r, ngx_resolver_ctx_t *ctx)
     hash = ngx_crc32_short(ctx->name.data, ctx->name.len);
 
     rn = ngx_resolver_lookup_name(r, &ctx->name, hash);
-
+    //查询的域名已经在红黑树中
     if (rn) {
 
         if (rn->valid >= ngx_time()) {
 
             ngx_log_debug0(NGX_LOG_DEBUG_CORE, r->log, 0, "resolve cached");
-
+            //从name_expire_queue中删除，并插到队尾；
             ngx_queue_remove(&rn->queue);
 
             rn->expire = ngx_time() + r->expire;
@@ -495,7 +495,7 @@ ngx_resolve_name_locked(ngx_resolver_t *r, ngx_resolver_ctx_t *ctx)
 #endif
 
             if (naddrs) {
-
+            	//仅仅只有一个ip地址
                 if (naddrs == 1 && rn->naddrs == 1) {
                     addrs = NULL;
 
@@ -543,7 +543,7 @@ ngx_resolve_name_locked(ngx_resolver_t *r, ngx_resolver_ctx_t *ctx)
             }
 
             /* NGX_RESOLVE_CNAME */
-
+            //如果在红黑树中查询到的是cname，则递归查找；
             if (ctx->recursion++ < NGX_RESOLVER_MAX_RECURSION) {
 
                 ctx->name.len = rn->cnlen;

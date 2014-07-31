@@ -23,11 +23,11 @@
 #endif
 #define NGX_RESOLVE_DNAME     39
 
-#define NGX_RESOLVE_FORMERR   1
-#define NGX_RESOLVE_SERVFAIL  2
-#define NGX_RESOLVE_NXDOMAIN  3
-#define NGX_RESOLVE_NOTIMP    4
-#define NGX_RESOLVE_REFUSED   5
+#define NGX_RESOLVE_FORMERR   1		//域名服务器无法解析请求，因为请求消息格式错误
+#define NGX_RESOLVE_SERVFAIL  2		//域名服务器因为内部错误无法解析该请求
+#define NGX_RESOLVE_NXDOMAIN  3		//只在权威域名服务器的响应消息中有效，标示请求中请求的域不存在
+#define NGX_RESOLVE_NOTIMP    4		//域名服务器不支持请求的类型
+#define NGX_RESOLVE_REFUSED   5		//域名服务器因为策略的原因拒绝执行请求的操作。例如域名服务器不会为特定的请求者返回查询结果，或者域名服务器不会为特定的请求返回特定的数据
 #define NGX_RESOLVE_TIMEDOUT  NGX_ETIMEDOUT
 
 
@@ -107,7 +107,7 @@ typedef struct {
     ngx_int_t                 ident;
 
     /* simple round robin DNS peers balancer */
-    ngx_array_t               udp_connections;
+    ngx_array_t               udp_connections;   //每个ip创建一个
     ngx_uint_t                last_connection;
 
     ngx_rbtree_t              name_rbtree;

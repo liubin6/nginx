@@ -774,7 +774,7 @@ ngx_parse_inet_url(ngx_pool_t *pool, ngx_url_t *u)
         return NGX_OK;
     }
 
-    //proxy_pass和proxy_eval中都会设置no_resolve为1。
+    //proxy_pass和proxy_eval中都会设置no_resolve为1,resolver指令解析的时候no_resolver=0
     if (u->no_resolve) {
         return NGX_OK;
     }

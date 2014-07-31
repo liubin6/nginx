@@ -638,7 +638,13 @@ ngx_module_t  ngx_http_proxy_module = {
 static char  ngx_http_proxy_version[] = " HTTP/1.0" CRLF;
 static char  ngx_http_proxy_version_11[] = " HTTP/1.1" CRLF;
 
-
+/*对于来自downstream的请求头，向upstream转发处理：
+ *无论proxy_pass_request_headers是否开关
+ *proxy_set_header和ngx_http_proxy_headers中的header都会传输；
+ *如：proxy_cache时，不管downstream的请求的range是怎样的，向upstream传输都会按照ngx_http_proxy_cache_headers数组中的将range头置为空；
+ *proxy_pass_request_headers开启时，对其他的头会透传；
+ *proxy_pass_request_headers关闭时，仅会传输proxy_set_header和ngx_http_proxy_headers中的header；
+*/
 static ngx_keyval_t  ngx_http_proxy_headers[] = {
     { ngx_string("Host"), ngx_string("$proxy_host") },
     { ngx_string("Connection"), ngx_string("close") },
@@ -1024,12 +1030,12 @@ ngx_http_proxy_create_request(ngx_http_request_t *r)
     u = r->upstream;
 
     plcf = ngx_http_get_module_loc_conf(r, ngx_http_proxy_module);
-
+    //proxy_cached时，head请求会转化为get请求
     if (u->method.len) {
         /* HEAD was changed to GET to cache response */
         method = u->method;
         method.len++;
-
+    //指令proxy_method所指定的method
     } else if (plcf->method.len) {
         method = plcf->method;
 
