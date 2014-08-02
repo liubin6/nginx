@@ -1260,10 +1260,10 @@ ngx_http_upstream_connect(ngx_http_request_t *r, ngx_http_upstream_t *u)
     c = u->peer.connection;
 
     c->data = r;
-
+    //由epoll触发
     c->write->handler = ngx_http_upstream_handler;
     c->read->handler = ngx_http_upstream_handler;
-
+    //由ngx_http_upstream_handler触发
     u->write_event_handler = ngx_http_upstream_send_request_handler;
     u->read_event_handler = ngx_http_upstream_process_header;
 
@@ -1293,7 +1293,7 @@ ngx_http_upstream_connect(ngx_http_request_t *r, ngx_http_upstream_t *u)
     u->writer.last = &u->writer.out;
     u->writer.connection = c;
     u->writer.limit = 0;
-
+    //表示重新连接时，需要初始化的一些内容
     if (u->request_sent) {
         if (ngx_http_upstream_reinit(r, u) != NGX_OK) {
             ngx_http_upstream_finalize_request(r, u,
@@ -1868,12 +1868,12 @@ ngx_http_upstream_process_header(ngx_http_request_t *r, ngx_http_upstream_t *u)
     if (ngx_http_upstream_process_headers(r, u) != NGX_OK) {
         return;
     }
-    //subrequest_in_memory为1表示不需要转发；
+    //转发
     if (!r->subrequest_in_memory) {
         ngx_http_upstream_send_response(r, u);
         return;
     }
-
+    //不转发，保留在内存中
     /* subrequest content in memory */
 
     if (u->input_filter == NULL) {
@@ -2140,7 +2140,7 @@ ngx_http_upstream_process_headers(ngx_http_request_t *r, ngx_http_upstream_t *u)
     ngx_http_upstream_main_conf_t  *umcf;
 
     umcf = ngx_http_get_module_main_conf(r, ngx_http_upstream_module);
-
+    //如果不忽略x_accel_redirect的处理方式
     if (u->headers_in.x_accel_redirect
         && !(u->conf->ignore_headers & NGX_HTTP_UPSTREAM_IGN_XA_REDIRECT))
     {
@@ -2205,7 +2205,7 @@ ngx_http_upstream_process_headers(ngx_http_request_t *r, ngx_http_upstream_t *u)
             h = part->elts;
             i = 0;
         }
-
+        //“Date”, “Server”, “X-Pad”, and “X-Accel-...”和通过proxy_hide_header设置的头部不会透传
         if (ngx_hash_find(&u->conf->hide_headers_hash, h[i].hash,
                           h[i].lowcase_key, h[i].key.len))
         {
@@ -2370,14 +2370,14 @@ ngx_http_upstream_send_response(ngx_http_request_t *r, ngx_http_upstream_t *u)
 
         u->pipe->downstream_error = 1;
     }
-
+    //清理request body
     if (r->request_body && r->request_body->temp_file) {
         ngx_pool_run_cleanup_file(r->pool, r->request_body->temp_file->file.fd);
         r->request_body->temp_file->file.fd = NGX_INVALID_FILE;
     }
 
     clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
-    //buffering表示会缓存
+    //proxy_buffering会设置，默认为on.buffering表示会缓存
     if (!u->buffering) {
 
         if (u->input_filter == NULL) {
@@ -2563,7 +2563,7 @@ ngx_http_upstream_send_response(ngx_http_request_t *r, ngx_http_upstream_t *u)
         ngx_http_upstream_finalize_request(r, u, NGX_ERROR);
         return;
     }
-
+    //处理header时，读入的body
     p->preread_bufs->buf = &u->buffer;
     p->preread_bufs->next = NULL;
     u->buffer.recycled = 1;
@@ -2618,7 +2618,7 @@ ngx_http_upstream_send_response(ngx_http_request_t *r, ngx_http_upstream_t *u)
     p->send_lowat = clcf->send_lowat;
 
     p->length = -1;
-
+    //ngx_http_proxy_handler中设置input_filter_init为ngx_http_proxy_input_filter_init
     if (u->input_filter_init
         && u->input_filter_init(p->input_ctx) != NGX_OK)
     {

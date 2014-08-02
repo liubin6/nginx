@@ -11,7 +11,7 @@
 
 
 typedef struct {
-    ngx_uint_t                         max_cached;	//最大允许多少个keepalive连接
+    ngx_uint_t                         max_cached;                //最大允许多少个keepalive连接
 
     ngx_queue_t                        cache;
     ngx_queue_t                        free;
@@ -241,6 +241,7 @@ ngx_http_upstream_get_keepalive_peer(ngx_peer_connection_t *pc, void *data)
                          item->socklen, pc->socklen)
             == 0)
         {
+            //如果在cache中发现同sockaddr，则从把相应节点从cache删除，插入free，避免重复使用
             ngx_queue_remove(q);
             ngx_queue_insert_head(&kp->conf->free, q);
 
@@ -304,7 +305,7 @@ ngx_http_upstream_free_keepalive_peer(ngx_peer_connection_t *pc, void *data,
 
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, pc->log, 0,
                    "free keepalive peer: saving connection %p", c);
-
+    //如果，free为空，则会删除cache的队尾
     if (ngx_queue_empty(&kp->conf->free)) {
 
         q = ngx_queue_last(&kp->conf->cache);
@@ -315,6 +316,7 @@ ngx_http_upstream_free_keepalive_peer(ngx_peer_connection_t *pc, void *data,
         ngx_http_upstream_keepalive_close(item->connection);
 
     } else {
+    //free不为空，直接从free中取item
         q = ngx_queue_head(&kp->conf->free);
         ngx_queue_remove(q);
 
@@ -363,7 +365,7 @@ ngx_http_upstream_keepalive_dummy_handler(ngx_event_t *ev)
                    "keepalive dummy handler");
 }
 
-
+//监测keepalive连接是否关闭
 static void
 ngx_http_upstream_keepalive_close_handler(ngx_event_t *ev)
 {

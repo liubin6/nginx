@@ -80,9 +80,9 @@ typedef ngx_int_t (*ngx_http_upstream_init_peer_pt)(ngx_http_request_t *r,
 
 
 typedef struct {
-    ngx_http_upstream_init_pt        init_upstream;
-    ngx_http_upstream_init_peer_pt   init;
-    void                            *data;
+    ngx_http_upstream_init_pt        init_upstream;       //在init_main_conf时初始化所有的peers，包括socket，weight
+    ngx_http_upstream_init_peer_pt   init;                //在upstream_init_request时设置peer.get,peer.set和rrp
+    void                            *data;                //ngx_http_upstream_rr_peers_t,比如一个upstream指令包含的所有peer的集合
 } ngx_http_upstream_peer_t;
 
 
