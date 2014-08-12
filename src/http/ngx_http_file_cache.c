@@ -96,7 +96,10 @@ ngx_http_file_cache_init(ngx_shm_zone_t *shm_zone, void *data)
 
         cache->shpool = ocache->shpool;
         cache->bsize = ocache->bsize;
-
+        //cache->bsize是磁盘block_size
+        //ll -sh test
+        //du -h test
+        //空文件不占用磁盘空间；不足block size占用一个block size
         cache->max_size /= cache->bsize;
 
         if (!cache->sh->cold || cache->sh->loading) {
@@ -130,7 +133,7 @@ ngx_http_file_cache_init(ngx_shm_zone_t *shm_zone, void *data)
     cache->sh->cold = 1;
     cache->sh->loading = 0;
     cache->sh->size = 0;
-
+    //求出磁盘的block-size
     cache->bsize = ngx_fs_bsize(cache->path->name.data);
 
     cache->max_size /= cache->bsize;
@@ -192,7 +195,7 @@ ngx_http_file_cache_create(ngx_http_request_t *r)
     if (ngx_http_file_cache_exists(cache, c) == NGX_ERROR) {
         return NGX_ERROR;
     }
-
+    //利用proxy_cache_path和key生成缓存文件绝对路径
     if (ngx_http_file_cache_name(r, cache->path) != NGX_OK) {
         return NGX_ERROR;
     }
@@ -218,6 +221,8 @@ ngx_http_file_cache_create_key(ngx_http_request_t *r)
     ngx_md5_init(&md5);
 
     key = c->keys.elts;
+    //keys->nelts=1
+    //key:localhost/video?want=127.0.0.1
     for (i = 0; i < c->keys.nelts; i++) {
         ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                        "http cache key: \"%V\"", &key[i]);
@@ -227,7 +232,7 @@ ngx_http_file_cache_create_key(ngx_http_request_t *r)
         ngx_crc32_update(&c->crc32, key[i].data, key[i].len);
         ngx_md5_update(&md5, key[i].data, key[i].len);
     }
-
+    //计算缓存文件中，response header的offset。
     c->header_start = sizeof(ngx_http_file_cache_header_t)
                       + sizeof(ngx_http_file_cache_key) + len + 1;
 
@@ -252,7 +257,7 @@ ngx_http_file_cache_open(ngx_http_request_t *r)
     if (c->waiting) {
         return NGX_AGAIN;
     }
-
+    //c->buf保存的是什么？合适保存？
     if (c->buf) {
         return ngx_http_file_cache_read(r, c);
     }
@@ -495,7 +500,7 @@ ngx_http_file_cache_read(ngx_http_request_t *r, ngx_http_cache_t *c)
                       "cache file \"%s\" is too small", c->file.name.data);
         return NGX_DECLINED;
     }
-
+    //cache file的文件头存储的是一个ngx_http_file_cache_header_t结构体
     h = (ngx_http_file_cache_header_t *) c->buf->pos;
 
     if (h->version != NGX_HTTP_CACHE_VERSION) {
@@ -531,7 +536,7 @@ ngx_http_file_cache_read(ngx_http_request_t *r, ngx_http_cache_t *c)
     r->cached = 1;
 
     cache = c->file_cache;
-
+    //如果还没有运行cache loader process
     if (cache->sh->cold) {
 
         ngx_shmtx_lock(&cache->shpool->mutex);
@@ -754,7 +759,8 @@ ngx_http_file_cache_name(ngx_http_request_t *r, ngx_path_t *path)
     if (c->file.name.len) {
         return NGX_OK;
     }
-
+    //计算cache绝对路径的长度
+    //如:/tmp/nginx/c/b4/c72de819b1f9c2c6ae042967b2a5ab4c
     c->file.name.len = path->name.len + 1 + path->len
                        + 2 * NGX_HTTP_CACHE_KEY_LEN;
 
@@ -1711,7 +1717,6 @@ ngx_http_file_cache_valid(ngx_array_t *cache_valid, ngx_uint_t status)
     return 0;
 }
 
-
 char *
 ngx_http_file_cache_set_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {
@@ -1747,7 +1752,8 @@ ngx_http_file_cache_set_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     value = cf->args->elts;
 
     cache->path->name = value[1];
-
+    //proxy_cache_path /tmp/nginx levels=1:2 keys_zone=one:100m inactive=1d max_size=1g;
+    //
     if (cache->path->name.data[cache->path->name.len - 1] == '/') {
         cache->path->name.len--;
     }
@@ -1766,8 +1772,10 @@ ngx_http_file_cache_set_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
             for (n = 0; n < 3 && p < last; n++) {
 
                 if (*p > '0' && *p < '3') {
-
+                	//cache->path->level[0]=1
+                	//cache->path->level[1]=2
                     cache->path->level[n] = *p++ - '0';
+                    //cache->path->len=1+1+2+1=5
                     cache->path->len += cache->path->level[n] + 1;
 
                     if (p == last) {
@@ -1808,7 +1816,7 @@ ngx_http_file_cache_set_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
                 s.len = value[i].data + value[i].len - p;
                 s.data = p;
-
+                //解析单位大小K,M
                 size = ngx_parse_size(&s);
                 if (size > 8191) {
                     continue;
@@ -1834,7 +1842,7 @@ ngx_http_file_cache_set_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
             continue;
         }
-
+        //max_size表示允许缓存占用的最大磁盘大小
         if (ngx_strncmp(value[i].data, "max_size=", 9) == 0) {
 
             s.len = value[i].len - 9;

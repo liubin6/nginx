@@ -497,6 +497,7 @@ ngx_add_path(ngx_conf_t *cf, ngx_path_t **slot)
     path = *slot;
 
     p = cf->cycle->paths.elts;
+    //检查是否与其他的proxy_cache_path存在冲突
     for (i = 0; i < cf->cycle->paths.nelts; i++) {
         if (p[i]->name.len == path->name.len
             && ngx_strcmp(p[i]->name.data, path->name.data) == 0)

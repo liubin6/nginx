@@ -149,13 +149,17 @@ ngx_open_cached_file(ngx_open_file_cache_t *cache, ngx_str_t *name,
     ngx_int_t                       rc;
     ngx_file_info_t                 fi;
     ngx_pool_cleanup_t             *cln;
+    //ngx_open_file_cache_t  描述整个file_cache
+    //ngx_cached_open_file_t 描述file_cache中某个node
     ngx_cached_open_file_t         *file;
     ngx_pool_cleanup_file_t        *clnf;
     ngx_open_file_cache_cleanup_t  *ofcln;
 
     of->fd = NGX_INVALID_FILE;
     of->err = 0;
-
+    //open_file_cache 是否缓存打开的文件描述符，默认off
+    //open_file_cache可能会引起页面显示不完整（可能文件还没生成完整的情况下，nginx就把文件的大小等信息缓存了）
+    //atomic file updates (rename ,move)
     if (cache == NULL) {
 
         if (of->test_only) {
@@ -662,7 +666,7 @@ ngx_open_file_wrapper(ngx_str_t *name, ngx_open_file_info_t *of,
 
         *cp = '/';
 
-        if (at_fd == NGX_INVALID_FILE) {
+        if (at_fd == NGX_INVAlLID_FILE) {
             of->err = ngx_errno;
             of->failed = ngx_open_file_n;
             return NGX_INVALID_FILE;
@@ -800,7 +804,7 @@ ngx_file_info_wrapper(ngx_str_t *name, ngx_open_file_info_t *of,
     ngx_fd_t  fd;
 
     if (of->disable_symlinks == NGX_DISABLE_SYMLINKS_OFF) {
-
+        //stat(file,sb)
         rc = ngx_file_info(name->data, fi);
 
         if (rc == NGX_FILE_ERROR) {

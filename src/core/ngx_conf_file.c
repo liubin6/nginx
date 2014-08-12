@@ -801,7 +801,7 @@ ngx_int_t
 ngx_conf_full_name(ngx_cycle_t *cycle, ngx_str_t *name, ngx_uint_t conf_prefix)
 {
     ngx_str_t  *prefix;
-
+    //cycle->prefix="/usr/local/nginx"
     prefix = conf_prefix ? &cycle->conf_prefix : &cycle->prefix;
 
     return ngx_get_full_name(cycle->pool, prefix, name);

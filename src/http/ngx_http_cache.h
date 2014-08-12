@@ -28,10 +28,12 @@
 
 #define NGX_HTTP_CACHE_VERSION       2
 
-
+//proxy_cache_valid 200 302 10m;
+//proxy_cache_valid 301      1h;
+//proxy_cache_valid any      1m;
 typedef struct {
-    ngx_uint_t                       status;
-    time_t                           valid;
+    ngx_uint_t                       status;   //响应值
+    time_t                           valid;    //缓存有效时间
 } ngx_http_cache_valid_t;
 
 
@@ -119,8 +121,11 @@ typedef struct {
     ngx_rbtree_t                     rbtree;
     ngx_rbtree_node_t                sentinel;
     ngx_queue_t                      queue;
+    //code＝＝0表示已经loader process已经运行完毕
     ngx_atomic_t                     cold;
+    //cache loader process正在load这个cache
     ngx_atomic_t                     loading;
+    //所有cache file所占用的磁盘大小
     off_t                            size;
 } ngx_http_file_cache_sh_t;
 

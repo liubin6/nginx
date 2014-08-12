@@ -717,11 +717,11 @@ ngx_http_upstream_cache(ngx_http_request_t *r, ngx_http_upstream_t *u)
         if (r->method & NGX_HTTP_HEAD) {
             u->method = ngx_http_core_get_method;
         }
-
+        //为r->cache申请内存，并且初始化r->cache->keys
         if (ngx_http_file_cache_new(r) != NGX_OK) {
             return NGX_ERROR;
         }
-
+        //ngx_http_proxy_create_key
         if (u->create_key(r) != NGX_OK) {
             return NGX_ERROR;
         }
@@ -729,7 +729,7 @@ ngx_http_upstream_cache(ngx_http_request_t *r, ngx_http_upstream_t *u)
         /* TODO: add keys */
 
         ngx_http_file_cache_create_key(r);
-
+        //256啥意思
         if (r->cache->header_start + 256 >= u->conf->buffer_size) {
             ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
                           "%V_buffer_size %uz is not enough for cache key, "

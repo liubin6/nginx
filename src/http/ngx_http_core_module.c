@@ -2008,7 +2008,7 @@ ngx_http_output_filter(ngx_http_request_t *r, ngx_chain_t *in)
     return rc;
 }
 
-
+//根据root，alias和uri，形成相应的文件绝对路径
 u_char *
 ngx_http_map_uri_to_path(ngx_http_request_t *r, ngx_str_t *path,
     size_t *root_length, size_t reserved)
@@ -2018,6 +2018,17 @@ ngx_http_map_uri_to_path(ngx_http_request_t *r, ngx_str_t *path,
     ngx_http_core_loc_conf_t  *clcf;
 
     clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
+    /*
+     *Defines a replacement for the specified location. For example, with the following configuration
+     *
+     *location /i/ {
+     *     alias /data/w3/images/;
+     * }
+     *
+     *on request of “/i/top.gif”, the file /data/w3/images/top.gif will be sent.
+     *
+    */
+
 
     alias = clcf->alias;
 
@@ -2038,7 +2049,7 @@ ngx_http_map_uri_to_path(ngx_http_request_t *r, ngx_str_t *path,
         if (path->data == NULL) {
             return NULL;
         }
-
+        //返回的指针指向copy完目标的结尾
         last = ngx_copy(path->data, clcf->root.data, clcf->root.len);
 
     } else {
