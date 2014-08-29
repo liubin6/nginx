@@ -810,7 +810,7 @@ ngx_http_upstream_cache(ngx_http_request_t *r, ngx_http_upstream_t *u)
         u->cache_status = NGX_HTTP_CACHE_EXPIRED;
 
         break;
-
+    //文件还没有被缓存，且proxy_cache_lock off.
     case NGX_DECLINED:
 
         if ((size_t) (u->buffer.end - u->buffer.start) < u->conf->buffer_size) {
@@ -2463,7 +2463,7 @@ ngx_http_upstream_send_response(ngx_http_request_t *r, ngx_http_upstream_t *u)
     case NGX_DECLINED:
         u->cacheable = 0;
         break;
-
+    //通常proxy_cache_pass会和proxy_no_cache一起使用
     default: /* NGX_OK */
 
         if (u->cache_status == NGX_HTTP_CACHE_BYPASS) {

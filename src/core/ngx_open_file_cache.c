@@ -157,7 +157,7 @@ ngx_open_cached_file(ngx_open_file_cache_t *cache, ngx_str_t *name,
 
     of->fd = NGX_INVALID_FILE;
     of->err = 0;
-    //open_file_cache 是否缓存打开的文件描述符，默认off
+    //open_file_cache是否缓存打开的文件描述符，默认off
     //open_file_cache可能会引起页面显示不完整（可能文件还没生成完整的情况下，nginx就把文件的大小等信息缓存了）
     //atomic file updates (rename ,move)
     if (cache == NULL) {

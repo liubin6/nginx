@@ -300,7 +300,7 @@ ngx_http_file_cache_open(ngx_http_request_t *r)
         rv = NGX_DECLINED;
 
     } else { /* rc == NGX_DECLINED */
-
+        //Sets the number of requests after which the response will be cached.
         if (c->min_uses > 1) {
 
             if (!cold) {
