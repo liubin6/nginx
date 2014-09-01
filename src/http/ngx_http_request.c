@@ -3352,7 +3352,7 @@ ngx_http_post_action(ngx_http_request_t *r)
                    "post action: \"%V\"", &clcf->post_action);
 
     r->main->count--;
-
+    //设置为0.9为了不让post_ation有输出
     r->http_version = NGX_HTTP_VERSION_9;
     r->header_only = 1;
     r->post_action = 1;

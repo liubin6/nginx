@@ -63,6 +63,7 @@ ngx_http_postpone_filter(ngx_http_request_t *r, ngx_chain_t *in)
     if (r != c->data) {
 
         if (in) {
+        	//现在不能输出，将请求和输出都加入r->postponed
             ngx_http_postpone_filter_add(r, in);
             return NGX_OK;
         }
@@ -84,7 +85,7 @@ ngx_http_postpone_filter(ngx_http_request_t *r, ngx_chain_t *in)
 
         return NGX_OK;
     }
-
+//在r->postponed != NULL 和 r == c->data 时， 才会走下面的代码
     if (in) {
         ngx_http_postpone_filter_add(r, in);
     }

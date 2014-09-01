@@ -9,6 +9,10 @@
 #include <ngx_core.h>
 #include <ngx_http.h>
 
+//在ngx_http_subrequest中ngx_http_post_request,把/add_before_body /add_after_body放到r->main->posted_requests
+//add_before_body的finalizy_request中调用ngx_http_post_request，把/subrequest放到r->main->posted_requests
+//执行/subrequest时，到postpone_filter中调用ngx_http_post_request,把/add_after_body放到r->main->posted_requests
+//执行/add_after_body的finalizy_request中调用ngx_http_post_request，把/subrequest放到r->main->posted_requests
 
 typedef struct {
     ngx_str_t     before_body;

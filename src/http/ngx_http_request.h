@@ -519,7 +519,7 @@ struct ngx_http_request_s {
     unsigned                          expect_tested:1;
     unsigned                          root_tested:1;
     unsigned                          done:1;
-    unsigned                          logged:1;
+    unsigned                          logged:1;                       //是否已经记录access.log
 
     unsigned                          buffered:4;
 
