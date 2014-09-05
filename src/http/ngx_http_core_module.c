@@ -675,7 +675,6 @@ static ngx_command_t  ngx_http_core_commands[] = {
       0,
       NULL },
 
-
     //post_action执行的产生的内容，包括头是不会返回给客户端的
     //即使有前面有return，post_ation依然会执行
     { ngx_string("post_action"),

@@ -2325,7 +2325,7 @@ ngx_http_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
     }
 
     if (r != r->main) {
-
+        // 在第一次执行subrequest2时，r->postponed!=NULL;
         if (r->buffered || r->postponed) {
 
             if (ngx_http_set_write_handler(r) != NGX_OK) {
@@ -2561,6 +2561,8 @@ ngx_http_set_write_handler(ngx_http_request_t *r)
     r->read_event_handler = r->discard_body ?
                                 ngx_http_discarded_request_body_handler:
                                 ngx_http_test_reading;
+    //此处保证在subrequest时，不会多次执行某request的ngx_http_core_run_phases;
+    //可见在ngx_http_subrequest中，sr->write_event_handler = ngx_http_handler;；
     r->write_event_handler = ngx_http_writer;
 
 #if (NGX_HTTP_SPDY)
