@@ -1881,7 +1881,8 @@ ngx_http_upstream_process_header(ngx_http_request_t *r, ngx_http_upstream_t *u)
         u->input_filter = ngx_http_upstream_non_buffered_filter;
         u->input_filter_ctx = r;
     }
-
+    //input_filter_init = ngx_http_proxy_input_filter_init
+    //input_filter = ngx_http_proxy_non_buffered_copy_filter ...
     if (u->input_filter_init(u->input_filter_ctx) == NGX_ERROR) {
         ngx_http_upstream_finalize_request(r, u, NGX_ERROR);
         return;
@@ -3089,7 +3090,7 @@ ngx_http_upstream_non_buffered_filter_init(void *data)
     return NGX_OK;
 }
 
-
+//把数据u->buffer复制到u->out_bufs
 static ngx_int_t
 ngx_http_upstream_non_buffered_filter(void *data, ssize_t bytes)
 {

@@ -2276,7 +2276,7 @@ ngx_http_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
         ngx_http_core_run_phases(r);
         return;
     }
-
+    //主请求没有post_subrequest.
     if (r != r->main && r->post_subrequest) {
         rc = r->post_subrequest->handler(r, r->post_subrequest->data, rc);
     }

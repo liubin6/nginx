@@ -373,6 +373,7 @@ ngx_http_add_variable(ngx_conf_t *cf, ngx_str_t *name, ngx_uint_t flags)
     cmcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_core_module);
 
     key = cmcf->variables_keys->keys.elts;
+    //查看cmcf->variables_keys是否存在相应值
     for (i = 0; i < cmcf->variables_keys->keys.nelts; i++) {
         if (name->len != key[i].key.len
             || ngx_strncasecmp(name->data, key[i].key.data, name->len) != 0)
@@ -381,13 +382,13 @@ ngx_http_add_variable(ngx_conf_t *cf, ngx_str_t *name, ngx_uint_t flags)
         }
 
         v = key[i].value;
-
+        //若相同，则看是否NGX_HTTP_VAR_CHANGEABLE；若否，则报错。
         if (!(v->flags & NGX_HTTP_VAR_CHANGEABLE)) {
             ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
                                "the duplicate \"%V\" variable", name);
             return NULL;
         }
-
+        //若是，则直接返回相应的ngx_http_variable_t
         return v;
     }
 

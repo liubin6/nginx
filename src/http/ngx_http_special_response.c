@@ -403,6 +403,7 @@ ngx_http_special_response_handler(ngx_http_request_t *r, ngx_int_t error)
 
     clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
 
+    //error_page 是否配置相应的http status
     if (!r->error_page && clcf->error_pages && r->uri_changes != 0) {
 
         if (clcf->recursive_error_pages == 0) {

@@ -746,6 +746,11 @@ ngx_http_proxy_handler(ngx_http_request_t *r)
 
     if (plcf->proxy_lengths == NULL) {
         ctx->vars = plcf->vars;
+        /*
+         *p plcf->vars
+         *{key_start = {len = 14, data = 0xa0ae99 "http://backend"}, schema = {len = 7, data = 0xa0ae99 "http://backend"}, host_header = {len = 7, data = 0xa0aea0 "backend"}, port = {len = 2,
+         * 	    data = 0x4d43a6 "80"}, uri = {len = 0, data = 0x0}}
+         */
         u->schema = plcf->vars.schema;
 #if (NGX_HTTP_SSL)
         u->ssl = (plcf->upstream.ssl != NULL);

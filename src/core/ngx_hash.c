@@ -274,7 +274,7 @@ ngx_hash_init(ngx_hash_init_t *hinit, ngx_hash_key_t *names, ngx_uint_t nelts)
     }
 
     bucket_size = hinit->bucket_size - sizeof(void *);
-
+    //计算所需bucket的最小数目，bucket用来存储ngx_hash_elt_t
     start = nelts / (bucket_size / (2 * sizeof(void *)));
     start = start ? start : 1;
 
@@ -283,7 +283,7 @@ ngx_hash_init(ngx_hash_init_t *hinit, ngx_hash_key_t *names, ngx_uint_t nelts)
     }
 
     for (size = start; size <= hinit->max_size; size++) {
-
+        //初始化为0
         ngx_memzero(test, size * sizeof(u_short));
 
         for (n = 0; n < nelts; n++) {
@@ -299,7 +299,7 @@ ngx_hash_init(ngx_hash_init_t *hinit, ngx_hash_key_t *names, ngx_uint_t nelts)
                           "%ui: %ui %ui \"%V\"",
                           size, key, test[key], &names[n].key);
 #endif
-
+            //为什么上面初始化为0，而下面初始化为sizeof(void *)。因为bucket_size已经减过sizeof(void *)。
             if (test[key] > (u_short) bucket_size) {
                 goto next;
             }
@@ -322,9 +322,10 @@ ngx_hash_init(ngx_hash_init_t *hinit, ngx_hash_key_t *names, ngx_uint_t nelts)
 found:
 
     for (i = 0; i < size; i++) {
+    	//初始化为sizeof(void *)
         test[i] = sizeof(void *);
     }
-
+    //计算每个bucket所需要的内存的大小
     for (n = 0; n < nelts; n++) {
         if (names[n].key.data == NULL) {
             continue;
@@ -335,7 +336,7 @@ found:
     }
 
     len = 0;
-
+    //CACHE_LINE对其，并且计算所有bucket共需要多少内存
     for (i = 0; i < size; i++) {
         if (test[i] == sizeof(void *)) {
             continue;
@@ -358,6 +359,7 @@ found:
                       ((u_char *) hinit->hash + sizeof(ngx_hash_wildcard_t));
 
     } else {
+    	//为buckets分配内存
         buckets = ngx_pcalloc(hinit->pool, size * sizeof(ngx_hash_elt_t *));
         if (buckets == NULL) {
             ngx_free(test);
@@ -372,7 +374,7 @@ found:
     }
 
     elts = ngx_align_ptr(elts, ngx_cacheline_size);
-
+    //为每个buckets[i]赋值，buckets开始地址
     for (i = 0; i < size; i++) {
         if (test[i] == sizeof(void *)) {
             continue;
@@ -386,7 +388,7 @@ found:
     for (i = 0; i < size; i++) {
         test[i] = 0;
     }
-
+    //给分配的buckets赋值
     for (n = 0; n < nelts; n++) {
         if (names[n].key.data == NULL) {
             continue;
@@ -403,6 +405,7 @@ found:
         test[key] = (u_short) (test[key] + NGX_HASH_ELT_SIZE(&names[n]));
     }
 
+    //结束符号：NULL
     for (i = 0; i < size; i++) {
         if (buckets[i] == NULL) {
             continue;
